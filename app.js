@@ -1,72 +1,64 @@
 function checkCashRegister(price, cash, cid) {
+    // change value multipled by 100 to make it easier to work with
+    let change = cash*100 - price*100;
+    // Total cash in register variable
+    let totalRegisterCash = cid.map(elem => elem[1]).reduce((a,b)=> a+b)*100
 
-let changeDue = cash - price
-
-// Total cash in register variable
-let totalRegisterCash = cid.map(elem => elem[1]).reduce((a,b)=> a+b).toFixed(2)
-
-// money values
-  let change = {
-    "PENNY": 0.01,
-    "NICKEL": 0.05,
-    "DIME": 0.1,
-    "QUARTER": 0.25,
-    "ONE": 1,
-    "FIVE": 5,
-    "TEN": 10,
-    "TWENTY": 20,
-    "ONE HUNDRED": 100
-  };
-
-  // object to return
-  let obj = [
+    // object to return
+    let obj = [
     {
     status: "INSUFFICIENT_FUNDS",
     change: []
     },
     {
     status: "CLOSED",
-    change: []
+    change: cid
     },
     {
     status: "OPEN",
     change: []
     },
-];
+    ];
 
-let changeValues = Object.values(change)
-
-// cycle through cid values in reverse, if the value is over 0 then minus its value only if this value is not over the changeDue variable value.
-
-let j = 1
-for (let i = 8; i > 0; i--) {
-    console.log(cid[i][1])
-    if (cid[i][1] > 0 && changeDue > changeValues[i]) {
-        //console.log(cid[i][1])
-        //console.log(changeValues[i])
-
-        while (j < changeValues.length && obj[2].change[j] < cid[i][1]) {
-            console.log("hey")
-            obj[2].change = [cid[i][0], changeValues[i] + changeValues[i]]
-            console.log(obj[2].change[1])
-            j++
+    // Conditionals to get results
+    if (change > totalRegisterCash) {
+        return obj[0]
+    } else if (change == totalRegisterCash) {
+        return obj[1]
+    } else {
+        let answer = []
+        cid = cid.reverse()
+        let moneyValues = {
+        "ONE HUNDRED": 10000,
+        "TWENTY": 2000,
+        "TEN": 1000,
+        "FIVE": 500,
+        "ONE": 100,
+        "QUARTER": 25,
+        "DIME": 10,
+        "NICKEL": 5,
+        "PENNY": 1
         }
-
+        for (let elem of cid) {
+            let purse = [elem[0], 0]
+            elem[1] = elem[1]*100
+            while (change >= moneyValues[elem[0]] && elem[1] > 0) {
+                change -= moneyValues[elem[0]]
+                elem[1] -= moneyValues[elem[0]]
+                purse[1] += moneyValues[elem[0]]
+            }
+            if (purse[1] > 0) {
+                purse[1] /= 100
+                answer.push(purse)
+                obj[2].change = answer
+            }
+        }
+        if (change > 0) {
+            return obj[0]
+        }
+        return obj[2]
     }
-    return obj[2]
-}
-
-
-// Insufficient funds and Closed status
-
-if (changeDue > totalRegisterCash) {
-    return obj[0]
-} else if (changeDue == totalRegisterCash) {
-    obj[1].change = cid
-    return obj[1]
-}
-
 
 }
 
-console.log(checkCashRegister(3.26, 100, [["PENNY", 1.01], ["NICKEL", 2.05], ["DIME", 3.1], ["QUARTER", 4.25], ["ONE", 90], ["FIVE", 55], ["TEN", 20], ["TWENTY", 60], ["ONE HUNDRED", 200]]));
+console.log(checkCashRegister(3.26, 100, [["PENNY", 1.01], ["NICKEL", 2.05], ["DIME", 3.1], ["QUARTER", 4.25], ["ONE", 90], ["FIVE", 55], ["TEN", 20], ["TWENTY", 60], ["ONE HUNDRED", 100]]));
